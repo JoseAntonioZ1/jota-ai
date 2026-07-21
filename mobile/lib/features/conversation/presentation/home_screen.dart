@@ -119,6 +119,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.alarm),
             tooltip: 'Recordatorios',
           ),
+          IconButton(
+            onPressed: () => context.push('/history'),
+            icon: const Icon(Icons.history),
+            tooltip: 'Historial',
+          ),
           const EmergencyButton(),
         ],
       ),

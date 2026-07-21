@@ -5,16 +5,17 @@ import '../../features/contacts/presentation/contact_form_screen.dart';
 import '../../features/contacts/presentation/contacts_list_screen.dart';
 import '../../features/conversation/presentation/home_screen.dart';
 import '../../features/emergency/presentation/emergency_contact_settings_screen.dart';
+import '../../features/history/presentation/conversation_detail_screen.dart';
+import '../../features/history/presentation/history_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/reminders/domain/reminder.dart';
 import '../../features/reminders/presentation/reminder_form_screen.dart';
 import '../../features/reminders/presentation/reminders_list_screen.dart';
-import '../../shared/widgets/placeholder_screen.dart';
 
-/// Rutas definidas en docs/05_UX_UI_DESIGN.md, seccion 4.
-/// Las pantallas implementadas en la Fase 3 (onboarding, home) tienen su
-/// widget real; el resto sigue en PlaceholderScreen hasta su fase del
-/// roadmap (docs/10_DEVELOPMENT_ROADMAP.md).
+/// Rutas definidas en docs/05_UX_UI_DESIGN.md, seccion 4, mas
+/// `/history/:id` (detalle de conversacion, UC-11) agregada en la Fase 7
+/// como extension consistente del patron ya usado por recordatorios y
+/// contactos.
 final appRouter = GoRouter(
   initialLocation: '/onboarding',
   routes: [
@@ -58,7 +59,12 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/history',
-      builder: (context, state) => const PlaceholderScreen(title: 'Historial'),
+      builder: (context, state) => const HistoryScreen(),
+    ),
+    GoRoute(
+      path: '/history/:id',
+      builder: (context, state) =>
+          ConversationDetailScreen(conversationId: state.pathParameters['id']!),
     ),
   ],
 );

@@ -63,3 +63,28 @@ class ConversationRepository:
             .all()
         )
         return list(reversed(recent_desc))
+
+    def list_for_user(
+        self, user_id: uuid.UUID, limit: int, offset: int
+    ) -> tuple[list[Conversation], int]:
+        """docs/04_USE_CASES.md UC-11: listado completo para historial,
+        no confundir con get_recent_messages (ventana de contexto del LLM)."""
+        query = self._db.query(Conversation).filter(Conversation.user_id == user_id)
+        total = query.count()
+        items = query.order_by(Conversation.started_at.desc()).offset(offset).limit(limit).all()
+        return items, total
+
+    def get_messages_paginated(
+        self, conversation_id: uuid.UUID, limit: int, offset: int
+    ) -> tuple[list[ConversationMessage], int]:
+        query = self._db.query(ConversationMessage).filter(
+            ConversationMessage.conversation_id == conversation_id
+        )
+        total = query.count()
+        items = (
+            query.order_by(ConversationMessage.created_at.asc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+        return items, total

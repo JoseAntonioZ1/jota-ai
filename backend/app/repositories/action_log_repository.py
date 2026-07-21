@@ -6,8 +6,7 @@ from app.models.action_log import ActionLog
 
 
 class ActionLogRepository:
-    """docs/08_DATABASE_DESIGN.md seccion 3.6. Solo `create` por ahora: la
-    lectura/listado (FR-06.2) es alcance de la Fase 7 (Historial)."""
+    """docs/08_DATABASE_DESIGN.md seccion 3.6."""
 
     def __init__(self, db: Session) -> None:
         self._db = db
@@ -29,3 +28,12 @@ class ActionLogRepository:
         self._db.commit()
         self._db.refresh(log)
         return log
+
+    def list_for_user(
+        self, user_id: uuid.UUID, limit: int, offset: int
+    ) -> tuple[list[ActionLog], int]:
+        """docs/04_USE_CASES.md UC-11 (FR-06.2)."""
+        query = self._db.query(ActionLog).filter(ActionLog.user_id == user_id)
+        total = query.count()
+        items = query.order_by(ActionLog.created_at.desc()).offset(offset).limit(limit).all()
+        return items, total
