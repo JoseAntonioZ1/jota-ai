@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/avatar_widget.dart';
@@ -71,7 +72,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('JOTA')),
+      appBar: AppBar(
+        title: const Text('JOTA'),
+        actions: [
+          IconButton(
+            onPressed: () => context.push('/reminders'),
+            icon: const Icon(Icons.alarm),
+            tooltip: 'Recordatorios',
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppDimens.screenPadding),
         child: Column(

@@ -2,6 +2,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/conversation/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/reminders/domain/reminder.dart';
+import '../../features/reminders/presentation/reminder_form_screen.dart';
+import '../../features/reminders/presentation/reminders_list_screen.dart';
 import '../../shared/widgets/placeholder_screen.dart';
 
 /// Rutas definidas en docs/05_UX_UI_DESIGN.md, seccion 4.
@@ -21,15 +24,16 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/reminders',
-      builder: (context, state) => const PlaceholderScreen(title: 'Recordatorios'),
+      builder: (context, state) => const RemindersListScreen(),
     ),
     GoRoute(
       path: '/reminders/new',
-      builder: (context, state) => const PlaceholderScreen(title: 'Nuevo recordatorio'),
+      builder: (context, state) => const ReminderFormScreen(),
     ),
     GoRoute(
       path: '/reminders/:id/edit',
-      builder: (context, state) => const PlaceholderScreen(title: 'Editar recordatorio'),
+      builder: (context, state) =>
+          ReminderFormScreen(existingReminder: state.extra as Reminder?),
     ),
     GoRoute(
       path: '/contacts',
