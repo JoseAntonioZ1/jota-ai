@@ -41,6 +41,25 @@ dependencies:
   # Navegacion (obligatorio, ver CLAUDE.md)
   go_router: ^14.6.2
 
+  # Cliente HTTP para el backend FastAPI (docs/09_API_DESIGN.md)
+  dio: ^5.7.0
+
+  # Almacenamiento seguro del token de dispositivo (docs/06 seccion 4.6)
+  flutter_secure_storage: ^9.2.2
+
+  # Grabacion de voz y reproduccion de audio (UC-03)
+  record: ^6.0.0
+  audioplayers: ^6.1.0
+
+  # Permisos nativos (FR-00.2) - solo aplica en Android/iOS
+  permission_handler: ^11.3.1
+
+  # Identificador opaco de dispositivo (docs/09_API_DESIGN.md seccion 4.1)
+  uuid: ^4.6.0
+
+  # Carpeta temporal para el archivo de audio grabado
+  path_provider: ^2.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

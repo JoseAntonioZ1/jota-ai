@@ -1,20 +1,23 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/conversation/presentation/home_screen.dart';
+import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../shared/widgets/placeholder_screen.dart';
 
 /// Rutas definidas en docs/05_UX_UI_DESIGN.md, seccion 4.
-/// Todas apuntan a PlaceholderScreen hasta que su fase del roadmap
-/// (docs/10_DEVELOPMENT_ROADMAP.md) implemente la pantalla real.
+/// Las pantallas implementadas en la Fase 3 (onboarding, home) tienen su
+/// widget real; el resto sigue en PlaceholderScreen hasta su fase del
+/// roadmap (docs/10_DEVELOPMENT_ROADMAP.md).
 final appRouter = GoRouter(
   initialLocation: '/onboarding',
   routes: [
     GoRoute(
       path: '/onboarding',
-      builder: (context, state) => const PlaceholderScreen(title: 'Configuracion inicial'),
+      builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const PlaceholderScreen(title: 'JOTA'),
+      builder: (context, state) => const HomeScreen(),
     ),
     GoRoute(
       path: '/reminders',
