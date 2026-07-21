@@ -110,24 +110,27 @@ Si la respuesta del modelo no es un JSON válido (riesgo real con modelos peque�
 
 ## 5. Selección y configuración del modelo de lenguaje
 
-| Parámetro | Valor inicial propuesto | Justificación |
+**Modelo confirmado (Fase 1, spike empírico — ver ADR-008):** Llama 3.2 3B vía Ollama.
+
+| Parámetro | Valor | Justificación |
 |---|---|---|
-| Modelo | Llama 3 8B, cuantizado (Q4_K_M) vía Ollama | Balance entre calidad de respuesta y viabilidad en hardware sin GPU dedicada |
+| Modelo | Llama 3.2 3B vía Ollama | Único tamaño probado que combina velocidad aceptable (prom. 11.8s en CPU) con confiabilidad de formato/contenido; Llama 3 8B fue descartado por lentitud (prom. 40.8s) y Llama 3.2 1B por generar una negativa peligrosa al crear un recordatorio de medicación |
 | `temperature` | 0.4 | Respuestas consistentes y predecibles; evita divagaciones para un asistente de asistencia práctica |
 | `max_tokens` (respuesta) | ~150 | Respuestas cortas por diseño (UX de voz — nadie quiere un párrafo largo hablado) |
-| Keep-alive del modelo en Ollama | Mantener el modelo cargado en memoria entre solicitudes | Evita el costo de carga en frío (varios segundos) en cada turno, crítico para NFR-01 |
+| Keep-alive del modelo en Ollama | Mantener el modelo cargado en memoria entre solicitudes | Evita el costo de carga en frío (~20-30s observado) en cada turno |
 
-**Validación obligatoria antes de comprometerse:** medir tiempo real de generación en el hardware disponible del autor **antes** de fijar el tamaño de modelo definitivo (riesgo técnico #2 de `ANALISIS_ARQUITECTONICO.md`). Si Llama 3 8B no cumple NFR-01/NFR-02, siguiente alternativa: un modelo más pequeño (p. ej. Llama 3.2 3B o Gemma 2B) antes de descartar la ejecución local.
+**Resultado de la validación (antes obligatoria, ahora completada):** medido en `backend/spikes/measure_llm_latency.py` contra el hardware real del autor (CPU-only, sin GPU utilizable por Ollama en Windows). Detalle completo de los tres tamaños probados en ADR-008. Consecuencia directa: NFR-01 se revisó de ≤3s a ≤15s (documentado en `03_NON_FUNCTIONAL_REQUIREMENTS.md`).
 
-### 5.1 Estrategia de fallback de proveedor
+### 5.1 Estrategia de fallback de proveedor (actualizada)
 
 ```mermaid
 flowchart LR
-  A[Llama 3 8B via Ollama] -->|no cumple latencia/calidad| B[Modelo local mas pequeno\nGemma / Llama 3 3B]
-  B -->|no cumple| C[OpenAI\nsolo como alternativa opcional]
+  A[Llama 3 8B via Ollama] -->|descartado: 40.8s prom| B[Llama 3.2 3B via Ollama]
+  B -->|"ELEGIDO (11.8s prom, confiable)"| D[MVP actual]
+  B -.no usado, NFR-01 ya se relajo.-> C[Groq / OpenAI]
 ```
 
-Consistente con `CLAUDE.md`: OpenAI es opcional y de último recurso, nunca la opción por defecto, dado el requisito de presupuesto extremadamente bajo.
+Consistente con `CLAUDE.md`: OpenAI (y Groq como alternativa gratuita de nube) quedan documentados como escape hatch futuro si el proyecto necesita latencia de nivel producción, pero **no se activan en el MVP** — se prefirió relajar NFR-01 y mantener el sistema 100% local y gratuito (decisión del autor, ADR-008).
 
 ---
 
@@ -138,7 +141,8 @@ Consistente con `CLAUDE.md`: OpenAI es opcional y de último recurso, nunca la o
 - **Recomendación para el MVP:** usar el patrón "mantener presionado para hablar" en vez de VAD automático — elimina un componente de incertidumbre técnica adicional (falsos cortes de audio) sin sacrificar usabilidad para el público objetivo, que de todas formas necesita una acción táctil explícita (alineado con `VoiceInputButton`, documento 5).
 
 ### 6.2 Speech-to-Text (`FasterWhisperProvider`)
-- Modelo: Whisper `small` o `base` (a validar contra NFR-05, WER ≤20%), ejecutado vía `faster-whisper` (más eficiente en CPU que la implementación original de OpenAI).
+- Modelo confirmado (spike Fase 1, ver ADR-008): Whisper `base` — ~1.9s de latencia en el hardware del autor, mejor balance que `small` (perfecto pero ~9s) y `tiny` (más rápido pero con más errores de transcripción). WER real contra voces de adultos mayores (NFR-05) sigue pendiente de validar en la Fase 9 con grabaciones humanas reales.
+- Ejecutado vía `faster-whisper` (más eficiente en CPU que la implementación original de OpenAI).
 - Idioma fijado a español (`language="es"`) para evitar el costo de detección automática de idioma.
 
 ### 6.3 Text-to-Speech (`PiperProvider`)
@@ -153,7 +157,7 @@ Consistente con `CLAUDE.md`: OpenAI es opcional y de último recurso, nunca la o
 | Fallo | Comportamiento |
 |---|---|
 | STT no transcribe nada (audio vacío/ruido) | Respuesta inmediata sin llamar al LLM: "No pude escucharte bien, ¿puedes repetir?" |
-| LLM no responde dentro de 6s | Se aborta la espera, se muestra el mensaje de error amigable de FR-01.4 |
+| LLM no responde dentro de 25s | Se aborta la espera, se muestra el mensaje de error amigable de FR-01.4 |
 | Salida del LLM no es JSON válido | Degradación descrita en sección 3.3 (se trata como chat plano) |
 | TTS falla al sintetizar | Se muestra la respuesta en texto igualmente; el fallo de audio no bloquea la respuesta visible |
 | Ollama no disponible (servicio caído) | `ConversationService` captura la excepción de conexión y responde con el mensaje de error de NFR-19, sin exponer detalles técnicos al usuario |

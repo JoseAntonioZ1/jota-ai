@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg2://jota:jota@localhost:5432/jota_ai"
     ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "llama3:8b"
+    ollama_model: str = "llama3.2:3b"
     environment: str = "development"
 
 

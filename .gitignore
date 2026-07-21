@@ -5,6 +5,10 @@ backend/**/__pycache__/
 backend/.env
 *.pyc
 
+# Artefactos binarios generados por los spikes (no son codigo fuente)
+backend/spikes/piper_voices/
+backend/spikes/*.wav
+
 # Mobile (Flutter)
 mobile/.dart_tool/
 mobile/.flutter-plugins

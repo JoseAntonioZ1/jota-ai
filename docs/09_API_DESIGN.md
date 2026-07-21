@@ -132,7 +132,7 @@ Response 200 (multipart o JSON con audio en base64, a definir en implementación
   "audio_base64": "..."
 }
 ```
-**Timeout del cliente:** 6 segundos (alineado con NFR-07); si se supera, la app muestra el error de FR-01.4 sin esperar más.
+**Timeout del cliente:** 25 segundos (alineado con NFR-07, revisado en ADR-008 tras medir la latencia real del LLM en hardware CPU-only); si se supera, la app muestra el error de FR-01.4 sin esperar más.
 
 **`GET /api/v1/conversations?limit=20&offset=0`**
 ```json

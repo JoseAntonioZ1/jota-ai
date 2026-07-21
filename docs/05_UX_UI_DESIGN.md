@@ -126,10 +126,18 @@ flowchart TD
 **Comportamiento:** botón flotante o de barra superior, visible en todas las pantallas principales (`/home`, `/reminders`, `/contacts`, `/history`), color `color.emergency` exclusivo, siempre en la misma posición (esquina superior derecha) para generar memoria muscular.
 **Interacción:** un toque → `ConfirmationCard` de emergencia → confirmar → llamada nativa. Si no hay contacto de emergencia configurado, el segundo paso redirige a `/settings/emergency-contact` con un mensaje explicativo, nunca un error técnico.
 
-### 6.4 `LatencyIndicator` ("sigo aquí")
-**Usa:** UC-03, alternate flow 3a; NFR-01
-**Comportamiento:** si han pasado más de 1.5s desde que el usuario terminó de hablar sin respuesta del sistema, se activa una señal breve (pulso visual en el avatar en estado "pensando" + sonido corto opcional) que se repite cada ~2s hasta que llegue la respuesta o se dispare el timeout de NFR-07.
-**Justificación:** evita que el silencio se interprete como falla del sistema (riesgo de UX documentado desde el análisis inicial).
+### 6.4 `LatencyIndicator` (rediseñado tras ADR-008: esperas reales de ~12-15s, no ~1.5s)
+**Usa:** UC-03, alternate flow 3a; NFR-01 (revisado a ≤15s), NFR-07 (timeout 25s)
+**Contexto del cambio:** el spike técnico de la Fase 1 confirmó que, en hardware CPU-only, la respuesta del LLM tarda varios segundos (5-19s medidos). Un indicador pensado para 1.5s ya no comunica honestamente la espera real — se rediseña en niveles progresivos:
+
+| Tiempo transcurrido | Comportamiento |
+|---|---|
+| 0-2s | Avatar en "pensando" con animación continua (respiración/pulso suave). Sin texto — la mayoría de respuestas de chat simple caen aquí. |
+| 2-5s | Se mantiene la animación; sin mensaje todavía (evita ruido visual para esperas cortas). |
+| >5s | Aparece un texto breve y tranquilizador bajo el avatar: **"Estoy pensando tu respuesta..."** — un solo mensaje, no una cuenta regresiva ni repeticiones que generen ansiedad. |
+| >25s (NFR-07) | Se aborta y se muestra el error amigable de FR-01.4; el mensaje de espera desaparece. |
+
+**Justificación:** evita que el silencio se interprete como falla del sistema (riesgo de UX documentado desde el análisis inicial), pero ahora calibrado a la latencia real medida en `ADR-008` en vez de un valor aspiracional que ya no aplica en este hardware.
 
 ### 6.5 `VoiceInputButton`
 **Usa:** UC-03

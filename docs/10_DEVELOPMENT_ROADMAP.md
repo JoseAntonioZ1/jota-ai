@@ -35,10 +35,10 @@ Ordenar la implementación del MVP priorizando la reducción de riesgo técnico 
 - Esqueleto de la app Flutter con GoRouter configurado (rutas vacías).
 - **Entregable:** proyecto ejecutable localmente, sin funcionalidad todavía, pero con arquitectura verificable (NFR-20).
 
-### Fase 1 — Spike técnico: pipeline de voz (Semana 2-3)
-- Script o endpoint mínimo que ejecute STT (faster-whisper) → LLM (Ollama) → TTS (Piper) de punta a punta, sin UI.
-- Medición real de latencia (NFR-01/NFR-02) y precisión de transcripción (NFR-05) en el hardware disponible.
-- **Gate de salida:** si Llama 3 8B no cumple los umbrales, se decide aquí mismo el modelo definitivo (sección 5.1 de `07_AI_ARCHITECTURE.md`) — **no se avanza a Fase 2 sin esta decisión tomada con datos reales**, para no rediseñar el backend a mitad de camino.
+### Fase 1 — Spike técnico: pipeline de voz (Semana 2-3) — ✅ COMPLETADA
+- Scripts de medición: `backend/spikes/measure_llm_latency.py`, `measure_stt_latency.py`, `measure_tts_latency.py`.
+- Medición real de latencia (NFR-01/NFR-02) en el hardware disponible (CPU-only, sin GPU utilizable por Ollama en Windows).
+- **Gate de salida resuelto (ver ADR-008):** Llama 3 8B no cumplió los umbrales (40.8s prom.); Llama 3.2 1B fue más rápido pero falló de forma peligrosa en el caso de uso de recordatorio de medicación. **Modelo definitivo: Llama 3.2 3B** (11.8s prom., confiable). Decisión del autor: relajar NFR-01 (≤3s → ≤15s) y mantener el sistema 100% local/gratuito, en vez de migrar a un proveedor en la nube. WER real contra voces de adultos mayores (NFR-05) queda pendiente para la Fase 9 (requiere grabaciones humanas reales).
 
 ### Fase 2 — Backend MVP: conversación (Semana 3-5)
 - Modelos SQLAlchemy + repositorios para `users`, `conversations`, `conversation_messages`.
@@ -95,7 +95,7 @@ Ordenar la implementación del MVP priorizando la reducción de riesgo técnico 
 | Semana | Fase | Hito verificable |
 |---|---|---|
 | 1-2 | Fase 0 | Proyecto corre localmente con Docker Compose |
-| 2-3 | Fase 1 | Latencia y WER medidos con datos reales; modelo de IA confirmado |
+| 2-3 | Fase 1 ✅ | Latencia medida con datos reales; modelo de IA confirmado (Llama 3.2 3B, ADR-008) |
 | 3-5 | Fase 2 | Conversación funcional vía API |
 | 5-8 | Fase 3 | Demo: onboarding + conversación por texto y voz en la app |
 | 8-10 | Fase 4 | Recordatorios end-to-end |
@@ -137,7 +137,7 @@ Una funcionalidad se considera terminada cuando:
 
 | Riesgo | Mitigación |
 |---|---|
-| Fase 1 revela que el hardware no soporta Llama 3 8B con latencia aceptable | Cambiar a modelo más pequeño (ya previsto en `07_AI_ARCHITECTURE.md`, sección 5.1); no rediseñar arquitectura, solo la configuración del `AIProvider` |
+| Fase 1 reveló que el hardware no soporta Llama 3 8B con latencia aceptable | **Materializado y resuelto:** se cambió a Llama 3.2 3B (ADR-008) sin rediseñar arquitectura, solo la configuración del `AIProvider` — confirma que el patrón de abstracción funcionó como estaba previsto |
 | Fase 9 (usabilidad) se retrasa por dificultad de reclutar adultos mayores | Iniciar el reclutamiento en paralelo a la Fase 3, no esperar a tener el producto "perfecto" |
 | Atraso general acumulado | Aplicar los recortes ya pre-aprobados del Vision Document (sección 7) — nunca inventar recortes de último momento sin registrarlos ahí primero |
 | Fase 8 (pulido de avatar) se extiende más de lo previsto | Es la fase con menor impacto en los criterios de éxito medibles (sección 9, Vision Document); recortable a estados estáticos sin animación fina si es necesario |

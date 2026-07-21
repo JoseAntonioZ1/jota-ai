@@ -25,16 +25,17 @@ Cerrar con valores numéricos concretos los umbrales que el Vision Document y lo
 ## 3. Rendimiento y latencia
 
 ### NFR-01 — Latencia total de respuesta por voz
-**Requisito:** Desde que el usuario termina de hablar hasta que JOTA comienza a reproducir audio de respuesta, el tiempo no debe superar **3 segundos** en el hardware de referencia del proyecto (a documentar en System Architecture).
+**Requisito (revisado tras spike de Fase 1, ver ADR-008):** Desde que el usuario termina de hablar hasta que JOTA comienza a reproducir audio de respuesta, el tiempo no debe superar **15 segundos** en el hardware de referencia del proyecto (equipo del autor, CPU sin aceleración GPU).
 **Prioridad:** Must
-**Justificación:** Por encima de ~3s, un adulto mayor tiende a asumir que el sistema no funcionó y repite la acción, generando confusión (ver riesgo técnico #1 en `ANALISIS_ARQUITECTONICO.md`).
+**Justificación original:** por encima de ~3s, un adulto mayor tiende a asumir que el sistema no funcionó (riesgo técnico #1 en `ANALISIS_ARQUITECTONICO.md`). Ese umbral de 3s sigue siendo el ideal de UX y es el objetivo para una futura iteración con GPU/nube (ver NFR-23), pero **no es alcanzable en el hardware CPU-only disponible para esta tesis** — medido empíricamente en la Fase 1 (`backend/spikes/`): el LLM por sí solo toma 5-19s incluso con el modelo local más pequeño confiable (Llama 3.2 3B). Se documenta como limitación de hardware conocida, no como incumplimiento oculto.
 **Verificación:** Medición cronometrada en al menos 20 interacciones de prueba, reportando p50 y p95.
-**Mitigación si no se cumple:** El avatar debe mostrar el estado "pensando" de forma continua desde el segundo 1, y si se supera 1.5s se reproduce una señal auditiva/visual de "sigo aquí" (p. ej. sonido breve o animación de espera) para no dejar al usuario en silencio total.
+**Mitigación:** dado que la espera real es de varios segundos, la mitigación deja de ser una señal breve de "sigo aquí" y pasa a ser una experiencia de espera diseñada explícitamente (ver `05_UX_UI_DESIGN.md`, sección 6.4 revisada): el avatar permanece en "pensando" de forma continua, con un mensaje de texto tranquilizador si la espera supera ~5s.
+**Camino de mejora futura:** si en una iteración posterior se dispone de GPU o se activa un proveedor en la nube (Groq/OpenAI) vía la abstracción `AIProvider` (NFR-23), el umbral ideal de 3s vuelve a ser la meta — el cambio es de configuración, no de arquitectura.
 
-### NFR-02 — Desglose de latencia por componente (referencia de diseño)
-**Requisito:** Como guía de diseño para no exceder NFR-01: STT ≤ 1.0s, generación LLM ≤ 1.5s, TTS ≤ 0.8s, overhead de red/procesamiento ≤ 0.5s (suma aproximada ≤ 3.0s).
+### NFR-02 — Desglose de latencia por componente (medido, Fase 1)
+**Requisito:** valores medidos empíricamente en `backend/spikes/` con el modelo confirmado (Llama 3.2 3B + Whisper base + Piper): STT ≈ 1.9s, generación LLM ≈ 5-19s (prom. 11.8s), TTS ≈ 0.3-0.5s (tras cargar el modelo), overhead ≈ 0.5s. Suma realista ≈ 12-15s, consistente con NFR-01.
 **Prioridad:** Should
-**Verificación:** Logging de tiempos por etapa en el backend durante pruebas.
+**Verificación:** Logging de tiempos por etapa en el backend durante pruebas (ya validado una vez en el spike; repetir con logging productivo en Fase 2).
 
 ### NFR-03 — Tiempo de arranque de la app
 **Requisito:** La app debe estar lista para interactuar (avatar visible, en estado "esperando") en menos de **4 segundos** desde que se abre, en un dispositivo gama media-baja.
@@ -63,7 +64,7 @@ Cerrar con valores numéricos concretos los umbrales que el Vision Document y lo
 **Verificación:** Set de 15-20 diálogos de prueba evaluados manualmente contra un criterio de "respuesta coherente / no coherente".
 
 ### NFR-07 — Comportamiento ante fallos de IA
-**Requisito:** Si el modelo de lenguaje no responde dentro de 6 segundos (timeout), el sistema debe abortar y mostrar el mensaje de error amigable de FR-01.4, nunca dejar la interfaz "colgada" sin retroalimentación.
+**Requisito (revisado tras spike de Fase 1):** Si el modelo de lenguaje no responde dentro de **25 segundos** (timeout — margen sobre el máximo observado de ~19-20s en el spike), el sistema debe abortar y mostrar el mensaje de error amigable de FR-01.4, nunca dejar la interfaz "colgada" sin retroalimentación.
 **Prioridad:** Must
 **Verificación:** Prueba de simulación de caída/latencia del servicio de IA.
 
@@ -183,10 +184,11 @@ Cerrar con valores numéricos concretos los umbrales que el Vision Document y lo
 
 | Pendiente en Vision Document (sección 9) | Valor cerrado aquí |
 |---|---|
-| Umbral de latencia percibida (referencia inicial ≤3s) | NFR-01: ≤3s confirmado como umbral oficial, con desglose NFR-02 |
+| Umbral de latencia percibida (referencia inicial ≤3s) | NFR-01: **revisado a ≤15s** tras el spike empírico de la Fase 1 (hardware CPU-only sin GPU) — ver ADR-008. El ≤3s original queda como meta futura si se migra a GPU/nube. |
 | N de usuarios para validación de usabilidad | NFR-09: referencia mínima 5-8 participantes (estudio cualitativo) |
 | Score mínimo de usabilidad (SUS ≥68 propuesto) | NFR-08: confirmado SUS ≥68 |
 | Prueba de sustitución de proveedor IA | NFR-23: definida como ejercicio de integración obligatorio |
+| Modelo LLM definitivo para el MVP | Llama 3.2 3B (vía Ollama), confirmado empíricamente en la Fase 1 — ver ADR-008 |
 
 ---
 
