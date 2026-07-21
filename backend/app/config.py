@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg2://jota:jota@localhost:5432/jota_ai"
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2:3b"
+    whisper_model_size: str = "base"
+    piper_voice_path: str = "voices/es_ES-davefx-medium.onnx"
     environment: str = "development"
 
 

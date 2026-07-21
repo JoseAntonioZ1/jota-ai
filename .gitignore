@@ -6,8 +6,11 @@ backend/.env
 *.pyc
 
 # Artefactos binarios generados por los spikes (no son codigo fuente)
-backend/spikes/piper_voices/
 backend/spikes/*.wav
+
+# Modelos de voz descargables (no son codigo fuente, ver README de setup)
+backend/voices/*.onnx
+backend/voices/*.onnx.json
 
 # Mobile (Flutter)
 mobile/.dart_tool/
