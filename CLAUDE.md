@@ -214,13 +214,15 @@ El avatar debe transmitir:
 * Profesionalismo.
 * Paciencia.
 
-Estados mínimos:
+Estados mínimos para el MVP (obligatorios):
 
-* Idle.
+* Idle / Esperando (fusionados en un solo estado para el MVP).
 * Escuchando.
 * Pensando.
 * Hablando.
-* Esperando.
+
+Estados adicionales de diseño completo (pospuestos a versión futura, no bloquean el MVP):
+
 * Feliz.
 * Confundido.
 * Preocupado.
