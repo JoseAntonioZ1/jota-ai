@@ -2,6 +2,8 @@ import uuid
 
 from pydantic import BaseModel
 
+from app.schemas.contact import ContactResponse
+
 
 class DeviceCreateRequest(BaseModel):
     device_fingerprint: str
@@ -17,6 +19,7 @@ class UserMeResponse(BaseModel):
     user_id: uuid.UUID
     name: str | None
     onboarding_completed: bool
+    emergency_contact: ContactResponse | None = None
 
 
 class UserUpdateRequest(BaseModel):

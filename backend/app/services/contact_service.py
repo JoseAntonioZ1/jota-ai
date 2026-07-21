@@ -2,14 +2,22 @@ import uuid
 
 from app.exceptions import NotFoundError
 from app.models.contact import Contact
+from app.models.user import User
 from app.repositories.action_log_repository import ActionLogRepository
 from app.repositories.contact_repository import ContactRepository
+from app.repositories.user_repository import UserRepository
 
 
 class ContactService:
-    def __init__(self, repo: ContactRepository, action_log_repo: ActionLogRepository) -> None:
+    def __init__(
+        self,
+        repo: ContactRepository,
+        action_log_repo: ActionLogRepository,
+        user_repo: UserRepository,
+    ) -> None:
         self._repo = repo
         self._action_log_repo = action_log_repo
+        self._user_repo = user_repo
 
     def create_contact(
         self, user_id: uuid.UUID, name: str, phone_number: str, photo_url: str | None
@@ -29,20 +37,25 @@ class ContactService:
             raise NotFoundError("No se encontro el contacto solicitado.")
         return self._repo.update(contact, **fields)
 
-    def delete_contact(self, user_id: uuid.UUID, contact_id: uuid.UUID) -> None:
-        contact = self._repo.get(contact_id, user_id)
+    def delete_contact(self, user: User, contact_id: uuid.UUID) -> bool:
+        """docs/09_API_DESIGN.md seccion 4.4: si el contacto eliminado era
+        el de emergencia vigente, se limpia la referencia y se informa al
+        llamador (para que la app pueda redirigir a UC-09)."""
+        contact = self._repo.get(contact_id, user.id)
         if contact is None:
             raise NotFoundError("No se encontro el contacto solicitado.")
+
+        was_emergency_contact = user.emergency_contact_id == contact.id
         self._repo.delete(contact)
+        if was_emergency_contact:
+            self._user_repo.update(user, emergency_contact_id=None)
+        return was_emergency_contact
 
     def log_call(self, user_id: uuid.UUID, contact_id: uuid.UUID, call_type: str):
         contact = self._repo.get(contact_id, user_id)
         if contact is None:
             raise NotFoundError("No se encontro el contacto solicitado.")
-        # docs/04_USE_CASES.md UC-10: la llamada de emergencia se registrara
-        # como "emergency_called" cuando la Fase 6 construya ese flujo; por
-        # ahora todo llamado desde Contactos es "contact_called".
-        action_type = "contact_called"
+        action_type = "emergency_called" if call_type == "emergency" else "contact_called"
         description = f"Llamada a {contact.name}"
         return self._action_log_repo.create(
             user_id=user_id,

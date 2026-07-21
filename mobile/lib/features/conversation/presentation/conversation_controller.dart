@@ -2,10 +2,10 @@ import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/avatar/avatar_state.dart';
 import '../../../core/avatar/avatar_state_provider.dart';
+import '../../../core/calling/dialer.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_client_provider.dart';
 import '../../contacts/domain/contact.dart';
@@ -61,27 +61,18 @@ final conversationControllerProvider =
       );
     });
 
-/// Inicia una llamada nativa al numero dado. Inyectable para pruebas: en
-/// plataformas de escritorio sin telefono (o en tests, sin canal de
-/// plataforma registrado) simplemente no hay nada que llamar.
-Future<void> _defaultDialer(Uri uri) async {
-  if (await canLaunchUrl(uri)) {
-    await launchUrl(uri);
-  }
-}
-
 class ConversationController extends StateNotifier<ConversationControllerState> {
   ConversationController(
     this._repository,
     this._contactRepository,
     this._ref, {
-    Future<void> Function(Uri uri) dialer = _defaultDialer,
+    Dialer dialer = defaultDialer,
   }) : _dialer = dialer,
        super(const ConversationControllerState());
 
   final ConversationRepository _repository;
   final ContactRepository _contactRepository;
-  final Future<void> Function(Uri uri) _dialer;
+  final Dialer _dialer;
   final Ref _ref;
   final _player = AudioPlayer();
 
@@ -183,7 +174,7 @@ class ConversationController extends StateNotifier<ConversationControllerState> 
 
     state = state.copyWith(pendingCall: null);
     try {
-      await _dialer(Uri(scheme: 'tel', path: contact.phoneNumber));
+      await _dialer(phoneUri(contact.phoneNumber));
     } catch (_) {
       // Sin capacidad de llamada nativa en esta plataforma (p. ej. Windows
       // en desarrollo): no bloquea el registro del intento en el historial.

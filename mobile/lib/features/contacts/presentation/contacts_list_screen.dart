@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/emergency_button.dart';
 import '../domain/contact.dart';
 import 'contacts_controller.dart';
 
@@ -15,7 +16,10 @@ class ContactsListScreen extends ConsumerWidget {
     final contactsAsync = ref.watch(contactsControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contactos frecuentes')),
+      appBar: AppBar(
+        title: const Text('Contactos frecuentes'),
+        actions: const [EmergencyButton()],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppDimens.screenPadding),
         child: Column(
@@ -63,6 +67,12 @@ class ContactsListScreen extends ConsumerWidget {
               onPressed: () => context.push('/contacts/new'),
               icon: const Icon(Icons.person_add),
               label: const Text('Nuevo contacto'),
+            ),
+            const SizedBox(height: AppDimens.spacingBetweenTargets),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/settings/emergency-contact'),
+              icon: const Icon(Icons.emergency, color: AppColors.emergency),
+              label: const Text('Configurar contacto de emergencia'),
             ),
           ],
         ),

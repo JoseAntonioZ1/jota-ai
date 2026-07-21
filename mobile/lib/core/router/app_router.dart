@@ -4,6 +4,7 @@ import '../../features/contacts/domain/contact.dart';
 import '../../features/contacts/presentation/contact_form_screen.dart';
 import '../../features/contacts/presentation/contacts_list_screen.dart';
 import '../../features/conversation/presentation/home_screen.dart';
+import '../../features/emergency/presentation/emergency_contact_settings_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/reminders/domain/reminder.dart';
 import '../../features/reminders/presentation/reminder_form_screen.dart';
@@ -53,7 +54,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/settings/emergency-contact',
-      builder: (context, state) => const PlaceholderScreen(title: 'Contacto de emergencia'),
+      builder: (context, state) => const EmergencyContactSettingsScreen(),
     ),
     GoRoute(
       path: '/history',

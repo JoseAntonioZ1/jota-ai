@@ -8,10 +8,12 @@ from app.database import get_db
 from app.models.user import User
 from app.repositories.action_log_repository import ActionLogRepository
 from app.repositories.contact_repository import ContactRepository
+from app.repositories.user_repository import UserRepository
 from app.schemas.contact import (
     ContactCallLogRequest,
     ContactCallLogResponse,
     ContactCreateRequest,
+    ContactDeleteResponse,
     ContactListResponse,
     ContactResponse,
     ContactUpdateRequest,
@@ -22,7 +24,7 @@ router = APIRouter()
 
 
 def _service(db: Session = Depends(get_db)) -> ContactService:
-    return ContactService(ContactRepository(db), ActionLogRepository(db))
+    return ContactService(ContactRepository(db), ActionLogRepository(db), UserRepository(db))
 
 
 @router.get("/contacts", response_model=ContactListResponse)
@@ -62,13 +64,14 @@ def update_contact(
     return ContactResponse.model_validate(contact)
 
 
-@router.delete("/contacts/{contact_id}", status_code=204)
+@router.delete("/contacts/{contact_id}", response_model=ContactDeleteResponse)
 def delete_contact(
     contact_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
     service: ContactService = Depends(_service),
-) -> None:
-    service.delete_contact(current_user.id, contact_id)
+) -> ContactDeleteResponse:
+    cleared = service.delete_contact(current_user, contact_id)
+    return ContactDeleteResponse(emergency_contact_cleared=cleared)
 
 
 @router.post("/contacts/{contact_id}/call-log", response_model=ContactCallLogResponse, status_code=201)

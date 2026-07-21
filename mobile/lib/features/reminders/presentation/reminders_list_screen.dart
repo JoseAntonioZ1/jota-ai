@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/emergency_button.dart';
 import '../domain/reminder.dart';
 import 'reminders_controller.dart';
 
@@ -15,7 +16,10 @@ class RemindersListScreen extends ConsumerWidget {
     final remindersAsync = ref.watch(remindersControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recordatorios')),
+      appBar: AppBar(
+        title: const Text('Recordatorios'),
+        actions: const [EmergencyButton()],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppDimens.screenPadding),
         child: Column(

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/avatar_widget.dart';
 import '../../../shared/widgets/confirmation_card.dart';
+import '../../../shared/widgets/emergency_button.dart';
 import '../../../shared/widgets/latency_indicator.dart';
 import '../../../shared/widgets/voice_input_button.dart';
 import '../../contacts/domain/contact.dart';
@@ -118,6 +119,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.alarm),
             tooltip: 'Recordatorios',
           ),
+          const EmergencyButton(),
         ],
       ),
       body: Padding(

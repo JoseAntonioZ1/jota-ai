@@ -53,7 +53,7 @@ class _FakeContactRepository implements ContactRepository {
   }
 
   @override
-  Future<void> deleteContact(String id) async {
+  Future<bool> deleteContact(String id) async {
     throw UnimplementedError('No usado en este test');
   }
 

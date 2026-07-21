@@ -89,8 +89,21 @@ class _ContactFormScreenState extends ConsumerState<ContactFormScreen> {
     );
     if (confirmed != true || !mounted) return;
 
-    await ref.read(contactsControllerProvider.notifier).delete(widget.existingContact!.id);
-    if (mounted) context.pop();
+    final emergencyCleared = await ref
+        .read(contactsControllerProvider.notifier)
+        .delete(widget.existingContact!.id);
+    if (!mounted) return;
+
+    context.pop();
+    if (emergencyCleared) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Ese era tu contacto de emergencia. Elige uno nuevo cuando puedas.',
+          ),
+        ),
+      );
+    }
   }
 
   @override

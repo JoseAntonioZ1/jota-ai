@@ -31,6 +31,10 @@ class ContactListResponse(BaseModel):
     total: int
 
 
+class ContactDeleteResponse(BaseModel):
+    emergency_contact_cleared: bool
+
+
 class ContactCallLogRequest(BaseModel):
     call_type: Literal["frequent", "emergency"] = "frequent"
 

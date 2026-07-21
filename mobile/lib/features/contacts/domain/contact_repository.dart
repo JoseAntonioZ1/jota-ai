@@ -8,7 +8,10 @@ abstract class ContactRepository {
 
   Future<Contact> updateContact({required String id, String? name, String? phoneNumber});
 
-  Future<void> deleteContact(String id);
+  /// docs/09_API_DESIGN.md seccion 4.4: devuelve true si el contacto
+  /// eliminado era el de emergencia vigente (la referencia ya se limpio
+  /// en el backend; el llamador debe avisar y redirigir a UC-09).
+  Future<bool> deleteContact(String id);
 
   /// UC-08: registra la llamada para el historial (Fase 7); el backend
   /// nunca inicia la llamada, solo la deja registrada.

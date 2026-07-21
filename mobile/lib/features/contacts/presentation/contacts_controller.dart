@@ -43,9 +43,11 @@ class ContactsController extends StateNotifier<AsyncValue<List<Contact>>> {
     await _load();
   }
 
-  Future<void> delete(String id) async {
-    await _repository.deleteContact(id);
+  /// Devuelve true si el contacto eliminado era el de emergencia vigente.
+  Future<bool> delete(String id) async {
+    final emergencyCleared = await _repository.deleteContact(id);
     await _load();
+    return emergencyCleared;
   }
 
   /// Lista actual sin recargar - usada por la conversacion (UC-08) para

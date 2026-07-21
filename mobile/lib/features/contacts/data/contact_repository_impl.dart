@@ -15,7 +15,7 @@ class ContactRepositoryImpl implements ContactRepository {
       final response = await _apiClient.dio.get('/contacts');
       final data = response.data as Map<String, dynamic>;
       final items = data['items'] as List<dynamic>;
-      return items.map((item) => _fromJson(item as Map<String, dynamic>)).toList();
+      return items.map((item) => Contact.fromJson(item as Map<String, dynamic>)).toList();
     } on DioException catch (exception) {
       throw ApiException.fromDioException(exception);
     }
@@ -28,7 +28,7 @@ class ContactRepositoryImpl implements ContactRepository {
         '/contacts',
         data: {'name': name, 'phone_number': phoneNumber},
       );
-      return _fromJson(response.data as Map<String, dynamic>);
+      return Contact.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (exception) {
       throw ApiException.fromDioException(exception);
     }
@@ -44,16 +44,18 @@ class ContactRepositoryImpl implements ContactRepository {
           if (phoneNumber != null) 'phone_number': phoneNumber,
         },
       );
-      return _fromJson(response.data as Map<String, dynamic>);
+      return Contact.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (exception) {
       throw ApiException.fromDioException(exception);
     }
   }
 
   @override
-  Future<void> deleteContact(String id) async {
+  Future<bool> deleteContact(String id) async {
     try {
-      await _apiClient.dio.delete('/contacts/$id');
+      final response = await _apiClient.dio.delete('/contacts/$id');
+      final data = response.data as Map<String, dynamic>;
+      return data['emergency_contact_cleared'] as bool? ?? false;
     } on DioException catch (exception) {
       throw ApiException.fromDioException(exception);
     }
@@ -69,14 +71,5 @@ class ContactRepositoryImpl implements ContactRepository {
     } on DioException catch (exception) {
       throw ApiException.fromDioException(exception);
     }
-  }
-
-  Contact _fromJson(Map<String, dynamic> json) {
-    return Contact(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      phoneNumber: json['phone_number'] as String,
-      photoUrl: json['photo_url'] as String?,
-    );
   }
 }
