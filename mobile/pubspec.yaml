@@ -64,6 +64,9 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
 
+  # Iniciar llamadas nativas (UC-08, UC-10) - el backend nunca llama
+  url_launcher: ^6.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

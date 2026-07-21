@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/contacts/domain/contact.dart';
+import '../../features/contacts/presentation/contact_form_screen.dart';
+import '../../features/contacts/presentation/contacts_list_screen.dart';
 import '../../features/conversation/presentation/home_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/reminders/domain/reminder.dart';
@@ -37,15 +40,16 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/contacts',
-      builder: (context, state) => const PlaceholderScreen(title: 'Contactos frecuentes'),
+      builder: (context, state) => const ContactsListScreen(),
     ),
     GoRoute(
       path: '/contacts/new',
-      builder: (context, state) => const PlaceholderScreen(title: 'Nuevo contacto'),
+      builder: (context, state) => const ContactFormScreen(),
     ),
     GoRoute(
       path: '/contacts/:id/edit',
-      builder: (context, state) => const PlaceholderScreen(title: 'Editar contacto'),
+      builder: (context, state) =>
+          ContactFormScreen(existingContact: state.extra as Contact?),
     ),
     GoRoute(
       path: '/settings/emergency-contact',

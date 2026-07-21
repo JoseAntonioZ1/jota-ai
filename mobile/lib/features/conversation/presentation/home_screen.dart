@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/avatar_widget.dart';
+import '../../../shared/widgets/confirmation_card.dart';
 import '../../../shared/widgets/latency_indicator.dart';
 import '../../../shared/widgets/voice_input_button.dart';
+import '../../contacts/domain/contact.dart';
 import '../domain/chat_message.dart';
 import 'conversation_controller.dart';
 
@@ -58,6 +60,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  /// UC-08: nunca se llama directamente - siempre pasa por ConfirmationCard.
+  void _showCallConfirmation(Contact contact) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimens.screenPadding),
+          child: ConfirmationCard(
+            title: '¿Llamar a ${contact.name}?',
+            summary: contact.phoneNumber,
+            confirmLabel: 'Sí, llamar',
+            correctLabel: 'Cancelar',
+            onConfirm: () {
+              Navigator.of(dialogContext).pop();
+              ref.read(conversationControllerProvider.notifier).confirmPendingCall();
+            },
+            onCorrect: () {
+              Navigator.of(dialogContext).pop();
+              ref.read(conversationControllerProvider.notifier).dismissPendingCall();
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(conversationControllerProvider);
@@ -69,12 +97,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text(next.errorMessage!)));
       }
+
+      final newPendingCall = next.pendingCall != null && next.pendingCall?.id != previous?.pendingCall?.id;
+      if (newPendingCall) {
+        _showCallConfirmation(next.pendingCall!);
+      }
     });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('JOTA'),
         actions: [
+          IconButton(
+            onPressed: () => context.push('/contacts'),
+            icon: const Icon(Icons.contacts),
+            tooltip: 'Contactos',
+          ),
           IconButton(
             onPressed: () => context.push('/reminders'),
             icon: const Icon(Icons.alarm),

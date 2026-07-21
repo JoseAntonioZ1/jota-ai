@@ -48,5 +48,11 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Requerido por url_launcher para iniciar llamadas (UC-08, UC-10)
+             en Android 11+ (restriccion de visibilidad de paquetes). -->
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
     </queries>
 </manifest>
